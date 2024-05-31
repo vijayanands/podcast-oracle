@@ -1,8 +1,5 @@
 from langchain.chains.summarize import load_summarize_chain
-from helpers.model_utils import get_model
 from helpers.prompts import BULLET_POINT_PROMPT
-
-llm = get_model()
 
 """
 This method involves an initial prompt on each chunk of data * ( for summarization tasks, this could be a summary 
@@ -21,7 +18,7 @@ def run_chain(chain, docs):
 
 
 
-def summarize_with_map_reduce(docs):
+def summarize_with_map_reduce(docs, llm):
     chain = load_summarize_chain(llm=llm, chain_type="map_reduce", verbose=False)
 
     # prompt used by the chain for summarizing each part
@@ -35,7 +32,7 @@ def summarize_with_map_reduce(docs):
     run_chain(chain=chain, docs=docs)
 
 
-def summarize_with_map_reduce_and_bullet_point_prompt(docs):
+def summarize_with_map_reduce_and_bullet_point_prompt(docs, llm):
     chain = load_summarize_chain(
         llm,
         chain_type="map_reduce",
@@ -58,7 +55,7 @@ pieces of data, this approach is no longer feasible. The next two approaches are
 """
 
 
-def summarize_with_stuff_chain(docs):
+def summarize_with_stuff_chain(docs, llm):
     chain = load_summarize_chain(llm, chain_type="stuff")
     run_chain(chain=chain, docs=docs)
 
