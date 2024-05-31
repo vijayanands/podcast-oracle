@@ -1,6 +1,6 @@
 from langchain.chains.summarize import load_summarize_chain
-from model_utils import get_model
-from prompts import BULLET_POINT_PROMPT
+from helpers.model_utils import get_model
+from helpers.prompts import BULLET_POINT_PROMPT
 
 llm = get_model()
 

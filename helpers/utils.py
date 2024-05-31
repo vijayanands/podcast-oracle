@@ -4,7 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain_community.vectorstores import FAISS
-from import_envs import openai_api_key, rtf_file, index_file, index_name
+from helpers.import_envs import openai_api_key, rtf_file, index_file, index_name
 import pypandoc
 
 def load_rtf_document(file_path):

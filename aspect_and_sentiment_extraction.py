@@ -1,5 +1,5 @@
-from import_envs import openai_api_key
-from import_envs import rtf_file
+from helpers.import_envs import openai_api_key
+from helpers.import_envs import rtf_file
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.passthrough import RunnablePassthrough

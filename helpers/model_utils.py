@@ -1,4 +1,4 @@
-from import_envs import llm_model, openai_api_key, anthropic_api_key
+from helpers.import_envs import llm_model, openai_api_key, anthropic_api_key
 from langchain_openai import OpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_community.llms import Ollama

@@ -1,5 +1,5 @@
-from utils import load_rtf_document_and_chunk, load_rtf_document
-from summarize import summarize_with_map_reduce
+from helpers.utils import load_rtf_document_and_chunk, load_rtf_document
+from helpers.summarize import summarize_with_map_reduce
 
 unchunked_documents = load_rtf_document(file_path=file_path)
 # print("Printing Length of unchunked documents loaded")

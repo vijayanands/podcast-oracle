@@ -1,5 +1,5 @@
-from utils import create_or_load_vectore_store
-from import_envs import openai_api_key
+from helpers.utils import create_or_load_vectore_store
+from helpers.import_envs import openai_api_key
 from langchain_openai import ChatOpenAI
 from langchain.schema import StrOutputParser
 from langchain_core.runnables.passthrough import RunnablePassthrough
