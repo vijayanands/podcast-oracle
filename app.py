@@ -1,7 +1,6 @@
 from utils import load_rtf_document_and_chunk, load_rtf_document
 from summarize import summarize_with_map_reduce
 
-file_path = "./data/Tim_O_Reilly_Podcast_text.rtf"
 unchunked_documents = load_rtf_document(file_path=file_path)
 # print("Printing Length of unchunked documents loaded")
 # for doc in unchunked_documents:
