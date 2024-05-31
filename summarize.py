@@ -1,7 +1,6 @@
 from langchain.chains.summarize import load_summarize_chain
 from model_utils import get_model
 from prompts import BULLET_POINT_PROMPT
-import textwrap
 
 llm = get_model()
 
@@ -17,11 +16,8 @@ Cons: Requires many more calls to the LLM than StuffDocumentsChain. Loses some i
 """
 
 def run_chain(chain, docs):
-    output_summary = chain.run(docs)
-    wrapped_text = textwrap.fill(
-        output_summary, width=100, break_long_words=False, replace_whitespace=False
-    )
-    print(wrapped_text)
+    output_summary = chain.invoke(docs)
+    print(output_summary['output_text'])
 
 
 
@@ -36,11 +32,7 @@ def summarize_with_map_reduce(docs):
     # print("prompt used by the chain for combining the parts:")
     # print(chain.combine_document_chain.llm_chain.prompt.template)
 
-    output_summary = chain.run(docs)
-    wrapped_text = textwrap.fill(
-        output_summary, width=100, break_long_words=False, replace_whitespace=False
-    )
-    print(wrapped_text)
+    run_chain(chain=chain, docs=docs)
 
 
 def summarize_with_map_reduce_and_bullet_point_prompt(docs):
@@ -51,11 +43,7 @@ def summarize_with_map_reduce_and_bullet_point_prompt(docs):
         combine_prompt=BULLET_POINT_PROMPT,
     )
 
-    output_summary = chain.run(docs)
-    wrapped_text = textwrap.fill(
-        output_summary, width=100, break_long_words=False, replace_whitespace=False
-    )
-    print(wrapped_text)
+    run_chain(chain=chain, docs=docs)
 
 
 """
@@ -72,13 +60,7 @@ pieces of data, this approach is no longer feasible. The next two approaches are
 
 def summarize_with_stuff_chain(docs):
     chain = load_summarize_chain(llm, chain_type="stuff")
-    output_summary = chain.run(docs)
-    wrapped_text = textwrap.fill(
-        output_summary, width=100, break_long_words=False, replace_whitespace=False
-    )
-    print(wrapped_text)
+    run_chain(chain=chain, docs=docs)
 
     # chain = load_summarize_chain(llm, chain_type="stuff", prompt=BULLET_POINT_PROMPT)
-    # output_summary = chain.run(docs)
-    # wrapped_text = textwrap.fill(output_summary, width=100, break_long_words=False, replace_whitespace=False)
-    # print(wrapped_text)
+    # run_chain(chain=chain, docs=docs)

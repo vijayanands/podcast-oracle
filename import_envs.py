@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-# llm_model="OPENAI"
-llm_model="LLAMA3"
+llm_model="OPENAI"
+# llm_model="LLAMA3"
 # llm_model_NAME="CLAUDE"
 
 load_dotenv()
