@@ -15,44 +15,40 @@ def extract_aspects(transcript_file_name):
     # Implement your aspect extraction and sentiment analysis logic here
     return extract_aspects_and_sentiment(transcript_file_name)
 
-def get_answer_for(question):
-    # Implement your QA logic here
-    return answer_question(question)
+def get_answer_for(user_question):
+    # Answer the user's question using the question-answering model
+    if user_question.strip():  # Ensure there is a question provided
+        answer_text = answer_question(question=user_question)
+    else:
+        answer_text = "No question asked."
 
-def gradio_interface(uploaded_file, user_question):
+    return answer_text.lstrip()
+
+def process_transcript(uploaded_file):
     # Process the file
     transcript_file_name = uploaded_file.name
     print(f"Transcript File Name :{transcript_file_name}")
     
     # Summarize the content
-    summary = summarize(transcript_file_name=transcript_file_name)
+    summary = summarize(transcript_file_name=transcript_file_name).lstrip()
 
     # Aspect-Based Sentiment Analysis
-    sentiment = extract_aspects(transcript_file_name=transcript_file_name)
+    sentiment = extract_aspects(transcript_file_name=transcript_file_name).lstrip()
 
-    # Answer the user's question using the question-answering model
-    if user_question.strip():  # Ensure there is a question provided
-        answer_text = get_answer_for(question=user_question)
-    else:
-        answer_text = "No question asked."
+    return summary, sentiment
 
-    return summary, sentiment, answer_text
+with gr.Blocks() as demo:
+    with gr.Tab("Aspect/Sentiment"):
+        rtf_file = gr.File(label="Podcast Transcript RTF file")
+        summary = gr.Textbox(label="Summary of Podcast")
+        sentiment = gr.Textbox(label="Aspect Based Sentiments")
+        submit_button = gr.Button("Submit")
+        submit_button.click(process_transcript, inputs=rtf_file, outputs=[summary, sentiment])
+    
+    with gr.Tab("Question/Answer"):
+        question = gr.Textbox(label="Question")
+        answer = gr.Textbox(label="Answer")
+        answer_button = gr.Button("Answer Question")
+        answer_button.click(get_answer_for, inputs= question, outputs=answer)
 
-# Setup Gradio interface
-iface = gr.Interface(
-    fn=gradio_interface,
-    inputs=[
-        gr.File(label="Upload Transcript File"),
-        gr.Textbox(label="Enter your question here", placeholder="Type your question...")
-    ],
-    outputs=[
-        gr.Textbox(label="Summary"),
-        gr.Textbox(label="Aspect-Based Sentiments"),
-        gr.Textbox(label="Question Answering")
-    ],
-    title="Podcast Oracle",
-    description="Upload your podcast transcript file to get a summary, aspect-based sentiments, and answers to predefined questions."
-)
-
-# Launch the app; this also hosts it on Hugging Face when run in the right environment
-iface.launch()
+demo.launch()
