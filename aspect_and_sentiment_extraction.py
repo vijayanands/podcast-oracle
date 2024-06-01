@@ -14,38 +14,41 @@ def extract_text_from_rtf(rtf_str):
     plain_text = plain_text.replace('\n', ' ').replace('\r', '')
     return plain_text
 
+def extract_aspects_and_sentiment(transcript_file_name):
+    # Read the RTF file content
+    with open(transcript_file_name, 'r') as file:
+        rtf_content = file.read()
 
-# Read the RTF file content
-with open(rtf_file, 'r') as file:
-    rtf_content = file.read()
+    # Extract plain text from the RTF content
+    document_text = extract_text_from_rtf(rtf_content)
 
-# Extract plain text from the RTF content
-document_text = extract_text_from_rtf(rtf_content)
+    prompt = """
 
-prompt = """
+    Extract aspects from the given text {document}. Once the aspects are extracted print them as a bulleted list and then based on the nature of 
+    aspects give a sentiment analysis on the aspects
 
-Extract aspects from the given text {document}. Once the aspects are extracted print them as a bulleted list and then based on the nature of 
-aspects give a sentiment analysis on the aspects
+    """
 
-"""
+    prompt_template = PromptTemplate(template=prompt, input_variables=["document"])
 
-prompt_template = PromptTemplate(template=prompt, input_variables=["document"])
+    # create a chat model / LLM
+    chat_model = ChatOpenAI(
+        model="gpt-3.5-turbo", temperature=0, api_key=openai_api_key
+    )
 
-# create a chat model / LLM
-chat_model = ChatOpenAI(
-    model="gpt-3.5-turbo", temperature=0, api_key=openai_api_key
-)
+    # create a parser to parse the output of our LLM
+    parser = StrOutputParser()
 
-# create a parser to parse the output of our LLM
-parser = StrOutputParser()
+    # 💻 Create the sequence (recipe)
+    runnable_chain = (
+        {"document": RunnablePassthrough()}
+        | prompt_template
+        | chat_model
+        | StrOutputParser()
+    )
 
-# 💻 Create the sequence (recipe)
-runnable_chain = (
-    {"document": RunnablePassthrough()}
-    | prompt_template
-    | chat_model
-    | StrOutputParser()
-)
+    answer = runnable_chain.invoke(document_text)
+    print(answer)
+    return answer
 
-answer = runnable_chain.invoke(document_text)
-print(answer)
+# extract_aspects_and_sentiment(rtf_file)

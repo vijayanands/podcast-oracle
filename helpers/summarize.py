@@ -13,10 +13,10 @@ Cons: Requires many more calls to the LLM than StuffDocumentsChain. Loses some i
 """
 
 def run_chain(chain, docs):
-    output_summary = chain.invoke(docs)
-    print(output_summary['output_text'])
-
-
+    output = chain.invoke(docs)
+    summary = output['output_text']
+    print(summary)
+    return summary
 
 def summarize_with_map_reduce(docs, llm):
     chain = load_summarize_chain(llm=llm, chain_type="map_reduce", verbose=False)
@@ -29,8 +29,7 @@ def summarize_with_map_reduce(docs, llm):
     # print("prompt used by the chain for combining the parts:")
     # print(chain.combine_document_chain.llm_chain.prompt.template)
 
-    run_chain(chain=chain, docs=docs)
-
+    return run_chain(chain=chain, docs=docs)
 
 def summarize_with_map_reduce_and_bullet_point_prompt(docs, llm):
     chain = load_summarize_chain(
@@ -40,7 +39,7 @@ def summarize_with_map_reduce_and_bullet_point_prompt(docs, llm):
         combine_prompt=BULLET_POINT_PROMPT,
     )
 
-    run_chain(chain=chain, docs=docs)
+    return run_chain(chain=chain, docs=docs)
 
 
 """
@@ -57,7 +56,7 @@ pieces of data, this approach is no longer feasible. The next two approaches are
 
 def summarize_with_stuff_chain(docs, llm):
     chain = load_summarize_chain(llm, chain_type="stuff")
-    run_chain(chain=chain, docs=docs)
+    return run_chain(chain=chain, docs=docs)
 
     # chain = load_summarize_chain(llm, chain_type="stuff", prompt=BULLET_POINT_PROMPT)
     # run_chain(chain=chain, docs=docs)
