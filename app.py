@@ -15,7 +15,7 @@ def get_answer_for(user_question, transcript_file_name, question_answer_llm_choi
         # Answer the user's question using the question-answering model
         answer_text = answer_question(question=user_question, transcript_file_name=transcript_file_name, llm_choice=question_answer_llm_choice)
 
-    return answer_text.lstrip(), transcript_file_name, llm_choice
+    return answer_text.lstrip(), transcript_file_name, question_answer_llm_choice
 
 def summarize(uploaded_file, transcript_file_name, summarization_method, summarization_llm_choice):
     if transcript_file_name is None:
@@ -28,7 +28,7 @@ def summarize(uploaded_file, transcript_file_name, summarization_method, summari
         # Summarize the content
         summary = summarize_podcast(transcript_file_name=transcript_file_name, summarization_method=summarization_method, llm_choice=summarization_llm_choice).lstrip()
 
-    return summary, transcript_file_name, summarization_method, llm_choice
+    return summary, transcript_file_name, summarization_method, summarization_llm_choice
 
 def generate_aspects_and_sentiments(uploaded_file, transcript_file_name, sentiment_analysis_llm_choice):
     if transcript_file_name is None:
