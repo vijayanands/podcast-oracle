@@ -20,7 +20,7 @@ def _set_llm_based_on_choice(choice):
         model_name = "gpt-4o"
         llm = OpenAI(model=model_name, temperature=0, api_key=openai_api_key)
     elif choice == ANTHROPIC:
-        model_name = "clause-2.1"
+        model_name = "claude-2.1"
         llm = ChatAnthropic(model_name=model_name, anthropic_api_key=anthropic_api_key)
     elif choice == LLAMA3:
         model_name = "llama3"
