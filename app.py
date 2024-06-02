@@ -1,46 +1,53 @@
 import gradio as gr
-from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
+from helpers.model_utils import GPT3, GPT3_INSTRUCT, GPT4, LLAMA3, ANTHROPIC, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
 
 def get_answer_for(user_question, transcript_file_name, llm_choice):
     if transcript_file_name is None:
-        return "No Transcript Uploaded, Upload RTF File First", ""
-    if user_question is None:
-        return "Question Not Given"
-    
-    # Answer the user's question using the question-answering model
-    if user_question.strip():  # Ensure there is a question provided
+        answer_text = "No Transcript Uploaded, Upload RTF File First", ""
+    elif not llm_choice:
+        answer_text = "No LLM Selected, select one"
+    elif not user_question:
+        answer_text = "Question Not Given"
+    else:    
+        # Answer the user's question using the question-answering model
         answer_text = answer_question(question=user_question, transcript_file_name=transcript_file_name, llm_choice=llm_choice)
-    else:
-        answer_text = "No question asked."
 
     return answer_text.lstrip(), transcript_file_name, llm_choice
 
 def summarize(uploaded_file, transcript_file_name, summarization_method, llm_choice):
     if transcript_file_name is None:
-        return "No Transcript Uploaded, Upload RTF File First", ""
-    
-    # Summarize the content
-    summary = summarize_podcast(transcript_file_name=transcript_file_name, summarization_method=summarization_method, llm_choice=llm_choice).lstrip()
+        summary = "No Transcript Uploaded, Upload RTF File First", ""
+    elif not llm_choice:
+        summary = "No LLM Selected, select one"
+    elif not summarization_method:
+        summary = "No Summarization Method Selected , select one"
+    else:        
+        # Summarize the content
+        summary = summarize_podcast(transcript_file_name=transcript_file_name, summarization_method=summarization_method, llm_choice=llm_choice).lstrip()
 
     return summary, transcript_file_name, summarization_method, llm_choice
 
 def generate_aspects_and_sentiments(uploaded_file, transcript_file_name, llm_choice):
     if transcript_file_name is None:
-        return "No Transcript Uploaded, Upload RTF File First", ""
-    
-    # Aspect-Based Sentiment Analysis
-    sentiment = extract_aspects_and_sentiment(transcript_file_name=transcript_file_name, llm_choice=llm_choice).lstrip()
+        sentiment = "No Transcript Uploaded, Upload RTF File First", ""
+    elif not llm_choice:
+        sentiment = "No LLM Selected, select one"
+    else:
+        # Aspect-Based Sentiment Analysis
+        sentiment = extract_aspects_and_sentiment(transcript_file_name=transcript_file_name, llm_choice=llm_choice).lstrip()
 
     return sentiment, transcript_file_name, llm_choice
 
 def setup_rtf_file_handle(uploaded_file, transcript_file_name):
     if not uploaded_file:
-        return None
-    transcript_file_name = uploaded_file.name
-    return transcript_file_name
+        status = "No File Detected, Failure"
+    else:
+        transcript_file_name = uploaded_file.name
+        status = "Upload Success"
+    return status, transcript_file_name
 
 def setup_summarization_llm(choice, llm_choice):
     set_summarization_llm(choice)
@@ -60,9 +67,10 @@ def setup_question_answer_llm(choice, llm_choice):
 def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
-
     
-llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC]
+summarization_llm_choices = [GPT3_INSTRUCT, GPT4, LLAMA3, ANTHROPIC]
+question_answer_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC]
+sentiment_analysis_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC]
 summarize_method_choices = [MAPREDUCE, STUFF]
 
 with gr.Blocks() as demo:
@@ -72,23 +80,24 @@ with gr.Blocks() as demo:
     with gr.Group("Upload RTF File"):
         rtf_file = gr.File(label="Podcast Transcript RTF file")
         submit_button = gr.Button("Upload File")
-        submit_button.click(setup_rtf_file_handle, inputs=[rtf_file, transcript_file_name], outputs=transcript_file_name)
+        submit_status = gr.Textbox(label="", value="Pending Upload")
+        submit_button.click(setup_rtf_file_handle, inputs=[rtf_file, transcript_file_name], outputs=[submit_status, transcript_file_name])
     with gr.Group("LLM Selection"):
         with gr.Row():
-            choice = gr.Radio(label="Summarization LLM", choices=llm_choices, value=GPT3)
-            output = gr.Textbox(label="", value=GPT3)
+            choice = gr.Radio(label="Summarization LLM", choices=summarization_llm_choices)
+            output = gr.Textbox(label="")
             choice.change(setup_summarization_llm, inputs=[choice,llm_choice], outputs=[output,llm_choice])
         with gr.Row():
-            choice = gr.Radio(label="Sentiment Analysis LLM", choices=llm_choices, value=GPT3)
-            output = gr.Textbox(label="", value=GPT3)
+            choice = gr.Radio(label="Sentiment Analysis LLM", choices=sentiment_analysis_llm_choices)
+            output = gr.Textbox(label="")
             choice.change(setup_summarization_llm, inputs=[choice,llm_choice], outputs=[output,llm_choice])
         with gr.Row():
-            choice = gr.Radio(label="Question/Answer LLM", choices=llm_choices, value=GPT3)
-            output = gr.Textbox(label="", value=GPT3)
+            choice = gr.Radio(label="Question/Answer LLM", choices=question_answer_llm_choices)
+            output = gr.Textbox(label="")
             choice.change(setup_summarization_llm, inputs=[choice,llm_choice], outputs=[output,llm_choice])
     with gr.Group("Summarization Method"):
-        choice = gr.Radio(label="Summarization Method", choices=summarize_method_choices, value=MAPREDUCE)
-        output = gr.Textbox(label="", value=MAPREDUCE)
+        choice = gr.Radio(label="Summarization Method", choices=summarize_method_choices)
+        output = gr.Textbox(label="")
         choice.change(setup_summarization_method, inputs=[choice, summarization_method], outputs=[output, summarization_method])
     with gr.Group("Summarize Podcast"):     
         summary = gr.Textbox(label="Summary of Podcast")

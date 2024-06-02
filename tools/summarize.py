@@ -81,8 +81,6 @@ def _summarize_with_stuff_chain(transcript_file_name, llm):
 
 
 def summarize_podcast(transcript_file_name, summarization_method = None, llm_choice = None):
-    # override model
-    llm_choice = GPT3_INSTRUCT
     llm = set_summarization_llm(llm_choice)
     if summarization_method == MAPREDUCE:
         return _summarize_with_map_reduce(transcript_file_name=transcript_file_name, llm=llm)
