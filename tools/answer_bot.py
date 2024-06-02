@@ -4,10 +4,13 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import StrOutputParser
 from langchain_core.runnables.passthrough import RunnablePassthrough
 from langchain.prompts import ChatPromptTemplate
+from helpers.model_utils import set_question_answer_llm
 
-def answer_question(question):
+def answer_question(question, transcript_file_name, llm_choice=None):
+    question_answer_llm = set_question_answer_llm(llm_choice)
+
     # Specify the path to the file you want to check
-    vector_store = create_or_load_vectore_store()
+    vector_store = create_or_load_vectore_store(transcript_file_name=transcript_file_name)
 
     # create a prompt template to send to our LLM that will incorporate the documents from our retriever with the
     # question we ask the chat model
@@ -20,7 +23,7 @@ def answer_question(question):
 
     # create a chat model / LLM
     chat_model = ChatOpenAI(
-        model="gpt-3.5-turbo", temperature=0, api_key=openai_api_key
+        model=question_answer_llm.model_name, temperature=0, api_key=openai_api_key
     )
 
     # create a parser to parse the output of our LLM
@@ -38,6 +41,3 @@ def answer_question(question):
     answer = runnable_chain.invoke(question)
     print(answer)
     return answer
-
-# question = "What is the opinion of the speaker on open source?"
-# answer_question(question)

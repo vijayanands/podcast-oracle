@@ -4,7 +4,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain.storage import LocalFileStore
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain_community.vectorstores import FAISS
-from helpers.import_envs import openai_api_key, rtf_file, index_file, index_name
+from helpers.import_envs import openai_api_key, index_file, index_name
 import pypandoc
 
 def load_rtf_document(file_path):
@@ -46,8 +46,8 @@ def embed_chunks(chunked_docs):
     vector_store.save_local(folder_path=index_name)
     return vector_store
 
-def create_or_load_vectore_store():
-    chunked_docs = load_rtf_document_and_chunk(file_path=rtf_file)
+def create_or_load_vectore_store(transcript_file_name):
+    chunked_docs = load_rtf_document_and_chunk(file_path=transcript_file_name)
 
     embedding_model = OpenAIEmbeddings(
         model="text-embedding-3-large", api_key=openai_api_key
