@@ -6,7 +6,7 @@ from transformers.pipelines import pipeline
 
 GPT3 = "gpt-3.5"
 GPT4 = "gpt-4o"
-LLAMA3 = "Llama3"
+LLAMA3 = "meta-llama/Meta-Llama-3-8B"
 ANTHROPIC2 = "Claude-2.1"
 
 def _set_llm_based_on_choice(choice):
@@ -20,7 +20,7 @@ def _set_llm_based_on_choice(choice):
         model_name = "claude-2.1"
         llm = ChatAnthropic(model_name=model_name, anthropic_api_key=anthropic_api_key)
     elif choice == LLAMA3:
-        model_name = "meta-llama/Meta-Llama-3-8B"
+        model_name = LLAMA3
         llm = pipeline("text-generation", model=model_name, token=huggingface_token)
     else:
         model_name = "gpt-3.5-turbo"
