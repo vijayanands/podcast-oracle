@@ -1,8 +1,8 @@
 from langchain_openai import OpenAI
 from langchain_anthropic import ChatAnthropic
-from langchain_community.llms import Ollama
-from helpers.import_envs import openai_api_key, anthropic_api_key
+from helpers.import_envs import openai_api_key, anthropic_api_key, huggingface_token
 from langchain_openai import ChatOpenAI
+from transformers.pipelines import pipeline
 
 GPT3 = "gpt-3.5"
 GPT4 = "gpt-4o"
@@ -20,8 +20,8 @@ def _set_llm_based_on_choice(choice):
         model_name = "claude-2.1"
         llm = ChatAnthropic(model_name=model_name, anthropic_api_key=anthropic_api_key)
     elif choice == LLAMA3:
-        model_name = "llama3"
-        llm = Ollama(model=model_name)
+        model_name = "meta-llama/Meta-Llama-3-8B"
+        llm = pipeline("text-generation", model=model_name, token=huggingface_token)
     else:
         model_name = "gpt-3.5-turbo"
         llm = ChatOpenAI(model=model_name, temperature=0, api_key=openai_api_key)
