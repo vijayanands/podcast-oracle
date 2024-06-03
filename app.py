@@ -68,9 +68,9 @@ def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
     
-summarization_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
-question_answer_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
-sentiment_analysis_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
+summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2]
+question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
+sentiment_analysis_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
 
 with gr.Blocks() as demo:
