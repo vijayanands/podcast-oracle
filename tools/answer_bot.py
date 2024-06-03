@@ -21,11 +21,6 @@ def answer_question(question, transcript_file_name, llm_choice=None):
     # create a retriever for our documents
     retriever = vector_store.as_retriever()
 
-    # create a chat model / LLM
-    chat_model = ChatOpenAI(
-        model=question_answer_llm.model_name, temperature=0, api_key=openai_api_key
-    )
-
     # create a parser to parse the output of our LLM
     parser = StrOutputParser()
 
@@ -34,7 +29,7 @@ def answer_question(question, transcript_file_name, llm_choice=None):
         # TODO: How do we chain the output of our retriever, prompt, model and model output parser so that we can get a good answer to our query?
         {"context": retriever, "question": RunnablePassthrough()}
         | prompt_template
-        | chat_model
+        | question_answer_llm
         | StrOutputParser()
     )
 

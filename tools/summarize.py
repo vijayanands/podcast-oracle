@@ -1,7 +1,7 @@
 from langchain.chains.summarize import load_summarize_chain
 from helpers.prompts import BULLET_POINT_PROMPT
 from helpers.utils import load_rtf_document_and_chunk, load_rtf_document
-from helpers.model_utils import set_summarization_llm, GPT3_INSTRUCT
+from helpers.model_utils import set_summarization_llm
 
 MAPREDUCE="map-reduce"
 STUFF="stuff"

@@ -1,5 +1,5 @@
 import gradio as gr
-from helpers.model_utils import GPT3, GPT3_INSTRUCT, GPT4, LLAMA3, ANTHROPIC, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
+from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
@@ -68,9 +68,9 @@ def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
     
-summarization_llm_choices = [GPT3_INSTRUCT, GPT4, LLAMA3, ANTHROPIC]
-question_answer_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC]
-sentiment_analysis_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC]
+summarization_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
+question_answer_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
+sentiment_analysis_llm_choices = [GPT3, GPT4, LLAMA3, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
 
 with gr.Blocks() as demo:
@@ -96,7 +96,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             choice = gr.Radio(label="Question/Answer LLM", choices=question_answer_llm_choices)
             output = gr.Textbox(label="")
-            choice.change(set_question_answer_llm, inputs=[choice,question_answer_llm_choice], outputs=[output,question_answer_llm_choice])
+            choice.change(setup_question_answer_llm, inputs=[choice,question_answer_llm_choice], outputs=[output,question_answer_llm_choice])
     with gr.Group("Summarization Method"):
         choice = gr.Radio(label="Summarization Method", choices=summarize_method_choices)
         output = gr.Textbox(label="")
