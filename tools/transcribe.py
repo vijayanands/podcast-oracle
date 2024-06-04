@@ -4,6 +4,9 @@ from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import requests
 import uuid
 
+WAV2VEC = "wav2vec"
+AUTOMODELFORSPEECH = "automodelforspeech"
+
 class Audio_to_Text:
     def __init__(self):
         self.model_id = "openai/whisper-large-v3"
@@ -34,19 +37,17 @@ class Audio_to_Text:
             file.write(response.content)
         print("MP3 file downloaded and saved successfully.")
     
-    def convert_audio_to_text(self, audio_file):
-        transformers.logging.set_verbosity_info()
-        result = self.pipe(audio_file, generate_kwargs={"language": "english"})
-        print("Converted audio to text successfully.")
-         # save the result to a text file
-        uuid_text = str(uuid.uuid4())
-        save_file_name = f"transcript-{uuid_text}.txt"
-        with open(save_file_name, "w") as file:
-            file.write(result)
-            print("Transcript saved successfully.")
-        return save_file_name
+    def convert_audio_to_text(self, audio_file, transcription_method):
+        if transcription_method == WAV2VEC:
+            return self.transcribe_audio_to_text_using_wav2vec(audio_file)
+        else:
+            transformers.logging.set_verbosity_info()
+            result = self.pipe(audio_file, generate_kwargs={"language": "english"})
+            print("Converted audio to text successfully.")
+            # save the result to a text file
+            return self.save_transcribed_text_to_file(result)
     
-    def convert_audio_to_text_from_url(self, url):
+    def convert_audio_to_text_from_url(self, url, transcription_method):
         #get uuid for the audio file
         uuid_audio = str(uuid.uuid4())
         save_path = f"audio-{uuid_audio}.mp3"
@@ -56,34 +57,32 @@ class Audio_to_Text:
        
         return path_text_file_of_audio
     
-def transcribe_podcast_from_mp3(mp3_file):
+    def save_transcribed_text_to_file(self, text):
+        uuid_text = str(uuid.uuid4())
+        save_file_name = f"transcript-{uuid_text}.txt"
+        with open(save_file_name, "w") as file:
+            file.write(text)
+            print("Transcript saved successfully.")
+        return save_file_name
+
+    def transcribe_audio_to_text_using_wav2vec(self, mp3):
+        asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
+        text = asr(mp3)["text"]
+        return self.save_transcribed_text_to_file(text)
+
+    
+def transcribe_podcast_from_mp3(mp3_file, transcription_method):
     audio_to_text = Audio_to_Text()
+    return audio_to_text.convert_audio_to_text(mp3_file, transcription_method);
 
-    path_text_file_of_audio = audio_to_text.convert_audio_to_text(mp3_file)
-    print(path_text_file_of_audio)
-    return path_text_file_of_audio
-
-def transcribe_podcast(file_url):
+def transcribe_podcast(file_url, transcription_method):
     # Example usage:
     # url = "https://chrt.fm/track/138C95/prfx.byspotify.com/e/play.podtrac.com/npr-510310/traffic.megaphone.fm/NPR7010771664.mp3"
-  
     
-    audio_to_text = Audio_to_Text()
-    
-    
+    audio_to_text = Audio_to_Text()    
     # Convert the audio file to text
-
-    path_text_file_of_audio = audio_to_text.convert_audio_to_text_from_url(file_url)
+    path_text_file_of_audio = audio_to_text.convert_audio_to_text_from_url(file_url, transcription_method)
     
     # Print the result
     print(path_text_file_of_audio)
     return path_text_file_of_audio
-
-def transcribe_audio_to_text(speech):
-    asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
-    text = asr(speech)["text"]
-    return text
-
-# def text_to_sentiment(text):
-#     classifier = pipeline("text-classification")
-#     return classifier(text)[0]["label"]
