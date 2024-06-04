@@ -3,7 +3,7 @@ from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, set_question_ans
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
-from tools.transcribe import transcribe_podcast
+from tools.transcribe import transcribe_podcast, transcribe_podcast_from_mp3
 
 def get_answer_for(user_question, transcript_file_name, question_answer_llm_choice):
     if transcript_file_name is None:
@@ -69,21 +69,22 @@ def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
 
-def transcribe_audio_file(uploaded_file, transcript_file_name):
+def transcribe_audio_file(uploaded_file, transcript_file_name, transcription_status):
     if not uploaded_file:
-        status = "No File Detected, Failure"
+        transcription_status = "No File Detected, Failure"
     else:
-        transcript_file_name = transcribe_podcast(uploaded_file.name)
-        status = "Upload Success"
-    return status, transcript_file_name
+        transcript_file_name = transcribe_podcast_from_mp3(uploaded_file.name)
+        transcription_status = "Upload Success"
+    return transcription_status, transcript_file_name
 
-def download_and_transcribe_podcast(mp3_url, transcript_file):
+def download_and_transcribe_podcast(mp3_url, transcript_file, transcription_status):
     if not mp3_url:
-        status = "No URL detected, Failure"
+        transcription_status = "No URL detected, Failure"
     else:
         transcript_file = transcribe_podcast(mp3_url)
-        status = "Upload Success"
-    return status, transcript_file
+        transcription_status = "Upload Success"
+    return transcription_status, transcript_file
+
     
 summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
@@ -96,16 +97,18 @@ with gr.Blocks() as demo:
     question_answer_llm_choice = gr.State()
     sentiment_analysis_llm_choice = gr.State()
     summarization_llm_choice = gr.State()
-    with gr.Group("Enter Podcast mp3 URL"):
-        mp3_url = gr.Textbox(label="Podcast MP3 URL")
-        submit_button = gr.Button("Transcribe")
-        transcribe_status = gr.Textbox(label="", value="Pending Transcribe")
-        submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file], outputs=[transcribe_status, transcript_file])
-    # with gr.Group("Upload Podcast mp3 File"):
-    #     mp3_file = gr.File(label="Podcast mp3 file")
-    #     submit_button = gr.Button("Upload File")
-    #     submit_status = gr.Textbox(label="", value="Pending Upload")
-    #     submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file], outputs=[submit_status, transcript_file])
+    transcription_status = gr.State(value = "Pending Transcribe")
+    with gr.Row():
+        with gr.Group("Enter Podcast mp3 URL"):
+            mp3_url = gr.Textbox(label="Podcast MP3 URL")
+            submit_button = gr.Button("Transcribe")
+            submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file, transcription_status], outputs=[transcription_status, transcript_file])
+        with gr.Group("Upload Podcast mp3 File"):
+            mp3_file = gr.File(label="Podcast mp3 file")
+            submit_button = gr.Button("Transcribe")
+            submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file, transcription_status], outputs=[transcription_status, transcript_file])
+    with gr.Group("Transcription Status"):
+        transcribe_status = gr.Textbox(label="Transcribe Status", value = transcription_status.value)
     with gr.Group("LLM Selection"):
         with gr.Row():
             choice = gr.Radio(label="Summarization LLM", choices=summarization_llm_choices)

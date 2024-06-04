@@ -1,4 +1,5 @@
 import torch
+import transformers
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import requests
 import uuid
@@ -34,6 +35,7 @@ class Audio_to_Text:
         print("MP3 file downloaded and saved successfully.")
     
     def convert_audio_to_text(self, audio_file):
+        transformers.logging.set_verbosity_info()
         result = self.pipe(audio_file, generate_kwargs={"language": "english"})
         print("Converted audio to text successfully.")
          # save the result to a text file
@@ -53,6 +55,13 @@ class Audio_to_Text:
         path_text_file_of_audio = self.convert_audio_to_text(save_path)
        
         return path_text_file_of_audio
+    
+def transcribe_podcast_from_mp3(mp3_file):
+    audio_to_text = Audio_to_Text()
+
+    path_text_file_of_audio = audio_to_text.convert_audio_to_text(mp3_file)
+    print(path_text_file_of_audio)
+    return path_text_file_of_audio
 
 def transcribe_podcast(file_url):
     # Example usage:
@@ -70,3 +79,11 @@ def transcribe_podcast(file_url):
     print(path_text_file_of_audio)
     return path_text_file_of_audio
 
+def transcribe_audio_to_text(speech):
+    asr = pipeline("automatic-speech-recognition", "facebook/wav2vec2-base-960h")
+    text = asr(speech)["text"]
+    return text
+
+# def text_to_sentiment(text):
+#     classifier = pipeline("text-classification")
+#     return classifier(text)[0]["label"]
