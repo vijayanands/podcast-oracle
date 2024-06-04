@@ -3,6 +3,7 @@ from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, set_question_ans
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
+from tools.transcribe import transcribe_podcast
 
 def get_answer_for(user_question, transcript_file_name, question_answer_llm_choice):
     if transcript_file_name is None:
@@ -17,7 +18,7 @@ def get_answer_for(user_question, transcript_file_name, question_answer_llm_choi
 
     return answer_text.lstrip(), transcript_file_name, question_answer_llm_choice
 
-def summarize(uploaded_file, transcript_file_name, summarization_method, summarization_llm_choice):
+def summarize(transcript_file_name, summarization_method, summarization_llm_choice):
     if transcript_file_name is None:
         summary = "No Transcript Uploaded, Upload RTF File First", ""
     elif not summarization_llm_choice:
@@ -30,7 +31,7 @@ def summarize(uploaded_file, transcript_file_name, summarization_method, summari
 
     return summary, transcript_file_name, summarization_method, summarization_llm_choice
 
-def generate_aspects_and_sentiments(uploaded_file, transcript_file_name, sentiment_analysis_llm_choice):
+def generate_aspects_and_sentiments(transcript_file_name, sentiment_analysis_llm_choice):
     if transcript_file_name is None:
         sentiment = "No Transcript Uploaded, Upload RTF File First", ""
     elif not sentiment_analysis_llm_choice:
@@ -41,13 +42,13 @@ def generate_aspects_and_sentiments(uploaded_file, transcript_file_name, sentime
 
     return sentiment, transcript_file_name, sentiment_analysis_llm_choice
 
-def setup_rtf_file_handle(uploaded_file, transcript_file_name):
-    if not uploaded_file:
-        status = "No File Detected, Failure"
-    else:
-        transcript_file_name = uploaded_file.name
-        status = "Upload Success"
-    return status, transcript_file_name
+# def setup_rtf_file_handle(uploaded_file, transcript_file_name):
+#     if not uploaded_file:
+#         status = "No File Detected, Failure"
+#     else:
+#         transcript_file_name = uploaded_file.name
+#         status = "Upload Success"
+#     return status, transcript_file_name
 
 def setup_summarization_llm(choice, summarization_llm_choice):
     set_summarization_llm(choice)
@@ -68,8 +69,21 @@ def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
 
-def transcribe_audio_file(audio_file_link):
-    return
+def transcribe_audio_file(uploaded_file, transcript_file_name):
+    if not uploaded_file:
+        status = "No File Detected, Failure"
+    else:
+        transcript_file_name = transcribe_podcast(uploaded_file.name)
+        status = "Upload Success"
+    return status, transcript_file_name
+
+def download_and_transcribe_podcast(mp3_url, transcript_file):
+    if not mp3_url:
+        status = "No URL detected, Failure"
+    else:
+        transcript_file = transcribe_podcast(mp3_url)
+        status = "Upload Success"
+    return status, transcript_file
     
 summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
@@ -77,16 +91,21 @@ sentiment_analysis_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
 
 with gr.Blocks() as demo:
-    transcript_file_name = gr.State()
+    transcript_file = gr.State()
     summarization_method = gr.State()
     question_answer_llm_choice = gr.State()
     sentiment_analysis_llm_choice = gr.State()
     summarization_llm_choice = gr.State()
-    with gr.Group("Upload RTF File"):
-        rtf_file = gr.File(label="Podcast Transcript RTF file")
-        submit_button = gr.Button("Upload File")
-        submit_status = gr.Textbox(label="", value="Pending Upload")
-        submit_button.click(setup_rtf_file_handle, inputs=[rtf_file, transcript_file_name], outputs=[submit_status, transcript_file_name])
+    with gr.Group("Enter Podcast mp3 URL"):
+        mp3_url = gr.Textbox(label="Podcast MP3 URL")
+        submit_button = gr.Button("Transcribe")
+        transcribe_status = gr.Textbox(label="", value="Pending Transcribe")
+        submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file], outputs=[transcribe_status, transcript_file])
+    # with gr.Group("Upload Podcast mp3 File"):
+    #     mp3_file = gr.File(label="Podcast mp3 file")
+    #     submit_button = gr.Button("Upload File")
+    #     submit_status = gr.Textbox(label="", value="Pending Upload")
+    #     submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file], outputs=[submit_status, transcript_file])
     with gr.Group("LLM Selection"):
         with gr.Row():
             choice = gr.Radio(label="Summarization LLM", choices=summarization_llm_choices)
@@ -107,16 +126,16 @@ with gr.Blocks() as demo:
     with gr.Group("Summarize Podcast"):     
         summary = gr.Textbox(label="Summary of Podcast")
         submit_button = gr.Button("Generate Summary")
-        submit_button.click(summarize, inputs=[rtf_file, transcript_file_name, summarization_method, summarization_llm_choice], outputs=[summary, transcript_file_name, summarization_method, summarization_llm_choice])    
+        submit_button.click(summarize, inputs=[transcript_file, summarization_method, summarization_llm_choice], outputs=[summary, transcript_file, summarization_method, summarization_llm_choice])    
     with gr.Group("Aspects and Sentiment of Podcast"):     
         sentiment = gr.Textbox(label="Aspect Based Sentiments")
         submit_button = gr.Button("Generate Aspects and Summary")
-        submit_button.click(generate_aspects_and_sentiments, inputs=[rtf_file, transcript_file_name, sentiment_analysis_llm_choice], outputs=[sentiment, transcript_file_name, sentiment_analysis_llm_choice])    
+        submit_button.click(generate_aspects_and_sentiments, inputs=[transcript_file, sentiment_analysis_llm_choice], outputs=[sentiment, transcript_file, sentiment_analysis_llm_choice])    
     with gr.Group("Question/Answer"):
         gr.Markdown("Question/Answer")
         question = gr.Textbox(label="Question")
         answer = gr.Textbox(label="Answer")
         answer_button = gr.Button("Answer Question")
-        answer_button.click(get_answer_for, inputs=[question, transcript_file_name, question_answer_llm_choice], outputs=[answer, transcript_file_name, question_answer_llm_choice])
+        answer_button.click(get_answer_for, inputs=[question, transcript_file, question_answer_llm_choice], outputs=[answer, transcript_file, question_answer_llm_choice])
 
 demo.launch()

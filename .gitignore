@@ -181,3 +181,4 @@ cython_debug/
 cache
 flagged
 *.rtf
+*.mp3
