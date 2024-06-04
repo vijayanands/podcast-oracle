@@ -67,6 +67,9 @@ def setup_question_answer_llm(choice, question_answer_llm_choice):
 def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
+
+def transcribe_audio_file(audio_file_link):
+    return
     
 summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
