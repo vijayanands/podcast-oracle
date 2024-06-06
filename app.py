@@ -1,5 +1,5 @@
 import gradio as gr
-from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
+from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, MISTRAL, set_question_answer_llm, set_sentiment_analysis_llm, set_summarization_llm
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
@@ -42,7 +42,7 @@ def generate_aspects_and_sentiments(transcript_file_name, sentiment_analysis_llm
 
     return sentiment, transcript_file_name, sentiment_analysis_llm_choice
 
-def setup_transcript_file_handle(uploaded_file, transcript_file_name, transcription_status):
+def setup_transcript_file_handle(uploaded_file, transcript_file_name):
     if not uploaded_file:
         transcription_status = "No File Detected, Failure"
     else:
@@ -89,7 +89,7 @@ def download_and_transcribe_podcast(mp3_url, transcript_file, transcription_meth
         status = "Upload Success"
     return transcript_file, transcription_method, status
     
-summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2]
+summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2, MISTRAL]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 sentiment_analysis_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
@@ -122,7 +122,8 @@ with gr.Blocks() as demo:
         with gr.Group("Upload RTF File"):
             rtf_file = gr.File(label="Transcripted RTF file")
             submit_button = gr.Button("Upload RTF")
-            submit_button.click(setup_transcript_file_handle, inputs=[rtf_file, transcript_file], outputs=[transcript_file])
+            status = gr.Textbox(label="", value="Pending Upload")
+            submit_button.click(setup_transcript_file_handle, inputs=[rtf_file, transcript_file], outputs=[status, transcript_file])
     with gr.Group("LLM Selection"):
         with gr.Row():
             choice = gr.Radio(label="Summarization LLM", choices=summarization_llm_choices)
