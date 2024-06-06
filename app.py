@@ -73,13 +73,24 @@ def setup_transcription_method(choice, transcription_method):
     transcription_method = choice
     return choice, transcription_method
 
+def get_transcribed_text_from_file(transcription_file):
+    # Define a variable to hold the content
+    file_content = ""
+
+    # Open the file in read mode
+    with open(transcription_file, 'r') as file:
+        # Read the entire content of the file into the string variable
+        file_content = file.read()
+
+    return file_content
+
 def transcribe_audio_file(uploaded_file, transcript_file_name, transcription_method):
     if not uploaded_file:
         status = "No File Detected, Failure"
     else:
         transcript_file_name = transcribe_podcast_from_mp3(uploaded_file.name, transcription_method)
         status = "Upload Success"
-    return transcript_file_name, transcription_method, status
+    return transcript_file_name, transcription_method, get_transcribed_text_from_file(transcript_file_name)
 
 def download_and_transcribe_podcast(mp3_url, transcript_file, transcription_method):
     if not mp3_url:
@@ -87,7 +98,7 @@ def download_and_transcribe_podcast(mp3_url, transcript_file, transcription_meth
     else:
         transcript_file = transcribe_podcast(mp3_url, transcription_method)
         status = "Upload Success"
-    return transcript_file, transcription_method, status
+    return transcript_file, transcription_method, get_transcribed_text_from_file(transcript_file_name)
     
 summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2, MISTRAL]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
@@ -101,29 +112,28 @@ with gr.Blocks() as demo:
     question_answer_llm_choice = gr.State()
     sentiment_analysis_llm_choice = gr.State()
     summarization_llm_choice = gr.State()
-    transcription_method = gr.State()
+    transcription_method = gr.State(value=WAV2VEC)
 
-    with gr.Group("Trancsription Model Selection"):
-        with gr.Row():
-            choice = gr.Radio(label="Transcription Model", choices=transcription_method_choices)
-            output = gr.Textbox(label="")
-            choice.change(setup_transcription_method, inputs=[choice, transcription_method], outputs=[output, transcription_method])
-    with gr.Row():
-        with gr.Group("Enter Podcast mp3 URL"):
-            mp3_url = gr.Textbox(label="Podcast MP3 URL")
-            submit_button = gr.Button("Transcribe")
-            status = gr.Textbox(label="", value="Pending Trancsribe")
-            submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, status])
-        with gr.Group("Upload Podcast mp3 File"):
-            mp3_file = gr.File(label="Podcast mp3 file")
-            submit_button = gr.Button("Transcribe")
-            status = gr.Textbox(label="", value="Pending Transcribe")
-            submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, status])
-        with gr.Group("Upload RTF File"):
-            rtf_file = gr.File(label="Transcripted RTF file")
-            submit_button = gr.Button("Upload RTF")
-            status = gr.Textbox(label="", value="Pending Upload")
-            submit_button.click(setup_transcript_file_handle, inputs=[rtf_file, transcript_file], outputs=[status, transcript_file])
+    # with gr.Group("Trancsription Model Selection"):
+    #     with gr.Row():
+    #         choice = gr.Radio(label="Transcription Model", choices=transcription_method_choices, value=WAV2VEC)
+    #         output = gr.Textbox(label="")
+    #         choice.change(setup_transcription_method, inputs=[choice, transcription_method], outputs=[output, transcription_method])
+    with gr.Group("Enter Podcast mp3 URL"):
+        mp3_url = gr.Textbox(label="Podcast MP3 URL")
+        submit_button = gr.Button("Transcribe")
+        transcript = gr.Textbox(label="Transcript of Podcast")
+        submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, transcript])
+    with gr.Group("Upload Podcast mp3 File"):
+        mp3_file = gr.File(label="Podcast mp3 file")
+        submit_button = gr.Button("Transcribe")
+        transcript = gr.Textbox(label="Transcript of Podcast")
+        submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, transcript])
+    with gr.Group("Upload RTF File"):
+        rtf_file = gr.File(label="Transcripted RTF file")
+        submit_button = gr.Button("Upload RTF")
+        status = gr.Textbox(label="", value="Pending Upload")
+        submit_button.click(setup_transcript_file_handle, inputs=[rtf_file, transcript_file], outputs=[status, transcript_file])
     with gr.Group("LLM Selection"):
         with gr.Row():
             choice = gr.Radio(label="Summarization LLM", choices=summarization_llm_choices)
