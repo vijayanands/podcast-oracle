@@ -3,7 +3,7 @@ from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, MISTRAL, set_que
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
-from tools.transcribe import transcribe_podcast, transcribe_podcast_from_mp3, WAV2VEC, AUTOMODELFORSPEECH
+from tools.transcribe import transcribe_podcast, transcribe_podcast_from_mp3, WAV2VEC, WHISPER
 
 def get_answer_for(user_question, transcript_file_name, question_answer_llm_choice):
     if transcript_file_name is None:
@@ -104,7 +104,7 @@ summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2, MISTRAL]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 sentiment_analysis_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
-transcription_method_choices = [WAV2VEC, AUTOMODELFORSPEECH]
+transcription_method_choices = [WAV2VEC, WHISPER]
 
 with gr.Blocks() as demo:
     transcript_file = gr.State()
@@ -112,7 +112,7 @@ with gr.Blocks() as demo:
     question_answer_llm_choice = gr.State()
     sentiment_analysis_llm_choice = gr.State()
     summarization_llm_choice = gr.State()
-    transcription_method = gr.State(value=WAV2VEC)
+    transcription_method = gr.State(value=WHISPER)
 
     # with gr.Group("Trancsription Model Selection"):
     #     with gr.Row():
