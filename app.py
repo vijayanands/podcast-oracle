@@ -3,7 +3,7 @@ from helpers.model_utils import GPT3, GPT4, LLAMA3, ANTHROPIC2, MISTRAL, set_que
 from tools.summarize import MAPREDUCE, STUFF, summarize_podcast
 from tools.answer_bot import answer_question
 from tools.aspect_and_sentiment_extraction import extract_aspects_and_sentiment
-from tools.transcribe import transcribe_podcast, transcribe_podcast_from_mp3, WAV2VEC, WHISPER
+from tools.transcribe import transcribe_podcast, transcribe_podcast_from_mp3
 
 def get_answer_for(user_question, transcript_file_name, question_answer_llm_choice):
     if transcript_file_name is None:
@@ -69,10 +69,6 @@ def setup_summarization_method(choice, summarization_method):
     summarization_method = choice
     return choice, summarization_method
 
-def setup_transcription_method(choice, transcription_method):
-    transcription_method = choice
-    return choice, transcription_method
-
 def get_transcribed_text_from_file(transcription_file):
     # Define a variable to hold the content
     file_content = ""
@@ -84,27 +80,26 @@ def get_transcribed_text_from_file(transcription_file):
 
     return file_content
 
-def transcribe_audio_file(uploaded_file, transcript_file_name, transcription_method):
+def transcribe_audio_file(uploaded_file, transcript_file_name):
     if not uploaded_file:
         status = "No File Detected, Failure"
     else:
-        transcript_file_name = transcribe_podcast_from_mp3(uploaded_file.name, transcription_method)
+        transcript_file_name = transcribe_podcast_from_mp3(uploaded_file.name)
         status = "Upload Success"
-    return transcript_file_name, transcription_method, get_transcribed_text_from_file(transcript_file_name)
+    return transcript_file_name, get_transcribed_text_from_file(transcript_file_name)
 
-def download_and_transcribe_podcast(mp3_url, transcript_file, transcription_method):
+def download_and_transcribe_podcast(mp3_url, transcript_file):
     if not mp3_url:
         status = "No URL detected, Failure"
     else:
-        transcript_file = transcribe_podcast(mp3_url, transcription_method)
+        transcript_file = transcribe_podcast(mp3_url)
         status = "Upload Success"
-    return transcript_file, transcription_method, get_transcribed_text_from_file(transcript_file_name)
+    return transcript_file, get_transcribed_text_from_file(transcription_file=transcript_file)
     
 summarization_llm_choices = [GPT3, GPT4, ANTHROPIC2, MISTRAL]
 question_answer_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 sentiment_analysis_llm_choices = [GPT3, GPT4, ANTHROPIC2]
 summarize_method_choices = [MAPREDUCE, STUFF]
-transcription_method_choices = [WAV2VEC, WHISPER]
 
 with gr.Blocks() as demo:
     transcript_file = gr.State()
@@ -112,23 +107,12 @@ with gr.Blocks() as demo:
     question_answer_llm_choice = gr.State()
     sentiment_analysis_llm_choice = gr.State()
     summarization_llm_choice = gr.State()
-    transcription_method = gr.State(value=WHISPER)
 
-    # with gr.Group("Trancsription Model Selection"):
-    #     with gr.Row():
-    #         choice = gr.Radio(label="Transcription Model", choices=transcription_method_choices, value=WAV2VEC)
-    #         output = gr.Textbox(label="")
-    #         choice.change(setup_transcription_method, inputs=[choice, transcription_method], outputs=[output, transcription_method])
-    with gr.Group("Enter Podcast mp3 URL"):
-        mp3_url = gr.Textbox(label="Podcast MP3 URL")
-        submit_button = gr.Button("Transcribe")
-        transcript = gr.Textbox(label="Transcript of Podcast")
-        submit_button.click(download_and_transcribe_podcast, inputs=[mp3_url, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, transcript])
     with gr.Group("Upload Podcast mp3 File"):
         mp3_file = gr.File(label="Podcast mp3 file")
         submit_button = gr.Button("Transcribe")
         transcript = gr.Textbox(label="Transcript of Podcast")
-        submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file, transcription_method], outputs=[transcript_file, transcription_method, transcript])
+        submit_button.click(transcribe_audio_file, inputs=[mp3_file, transcript_file], outputs=[transcript_file, transcript])
     with gr.Group("Upload RTF File"):
         rtf_file = gr.File(label="Transcripted RTF file")
         submit_button = gr.Button("Upload RTF")
